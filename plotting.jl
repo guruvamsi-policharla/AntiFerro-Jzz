@@ -26,7 +26,7 @@ nanmean(x,y) = mapslices(nanmean,x,y)
 #f=jldopen("./data/Full Fledged/data16x16full.jld2","r")
 
 #f=jldopen("./data/fullres/data8x8fullresbind_1.jld2","r")
-f=jldopen("/home/vamsi/GitHub/AntiFerro-Lattices/Data/data32x32fullresbind2018-11-13T22:18:23.94.jld2","r")
+f=jldopen("/home/vamsi/Github/AntiFerro-Jzz/data4x4fullresbind2019-02-01T16:22:07.006.jld2","r")
 mag_temp = f["mag_temp"].s
 skyrm_temp = f["skyrm_temp"].s
 skyrm_err_temp = f["skyrm_err_temp"].s

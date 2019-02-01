@@ -93,7 +93,7 @@ function transient_results(lat, transient::Int, J, T)
 end
 
 function montecarlo(Temperature,N,J_space)
-    mcs = 5
+    mcs = 10000
     M = N
 
     normalisation=(1.0/float(M*N))
@@ -119,6 +119,7 @@ function montecarlo(Temperature,N,J_space)
     #autocor_vec = 0
     Jcount = 1
     for J in J_space
+        println(J)
         lat = initialise(M,N)
         Tcount = 1
         for T in Temperature

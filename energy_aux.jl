@@ -8,7 +8,7 @@ function test_flip(x, y, J, lat, T)
     #a = sample_uni()
     a = sample_gauss(lat[x,y])
     de = -energy_pos(x,y,J,lat) + energy_pos(x,y,J,lat,a);
-
+    
     if(de<0)
         lat[x,y] = a
         return true
@@ -20,26 +20,28 @@ function test_flip(x, y, J, lat, T)
     end
 end
 
-function energy_pos(x, y, J, lat, a = [0,0,0])
-    M = size(lat,1)
-    N = size(lat,2)
+function myplus(a,b,N)
+    c = mod(a+b,N)
+    if c == 0
+        c = N
+    end
+    return c
+end
 
-    up = mod(y,N)+1
-    down = mod(y-2,N)+1
-    left = mod(x-2,M) + 1
-    right = mod(x,M) + 1
-    urc = [mod(x,M)+1,mod(y,N)+1]
-    ulc = [mod(x-2,M)+1,mod(y,N)+1]
-    lrc = [mod(x,M)+1,mod(y-2,N)+1]
-    llc = [mod(x-2,M)+1,mod(y-2,N)+1]
+
+function energy_pos(x, y, J, lat, a = [0,0,0])
+    N = size(lat,1)
+
+    left = lat[myplus(x,-1,N),y]
+    right = lat[myplus(x,1,N),y]
+    down = lat[x,myplus(y,1,N)]
+    up = lat[x,myplus(y,-1,N)]
 
     if(a == [0,0,0])
-        energy = 1*dot(lat[x,y],(lat[left,y]+lat[right,y]+lat[x,up]+lat[x,down]));
-        energy = energy + J*dot(lat[x,y],(lat[urc[1],urc[2]]+lat[ulc[1],ulc[2]]+lat[lrc[1],lrc[2]]+lat[llc[1],llc[2]]));
+        energy = 1*dot(lat[x,y],left + right + up + down) + (J-1)*(lat[x,y][3])*(left[3] + up[3] + right[3] + down[3]);
         return energy
     else
-        energy = 1*dot(a,(lat[left,y]+lat[right,y]+lat[x,up]+lat[x,down]));
-        energy = energy + J*dot(a,(lat[urc[1],urc[2]]+lat[ulc[1],ulc[2]]+lat[lrc[1],lrc[2]]+lat[llc[1],llc[2]]));
+        energy = 1*dot(a,left + right + up + down) + (J-1)*a[3]*(left[3] + up[3] + right[3] + down[3]);
         return energy
     end
 end
@@ -51,5 +53,5 @@ function total_energy(J,lat)
             e = e + energy_pos(i,j,J,lat)
         end
     end
-    return e/2
+    return e/2;
 end
