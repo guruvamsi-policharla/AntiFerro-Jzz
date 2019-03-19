@@ -15,63 +15,47 @@ end
 nanmean(x) = mean(filter(!isnan,x))
 nanmean(x,y) = mapslices(nanmean,x,y)
 
-#Tmin = 0.1
-#Tchange = 0.1
-#Tmax = 3 #Change temp IN BOTH LOCATIONS!!!
-#Temperature = Tmin:Tchange:Tmax
-
-#J_space = [0,0.25,0.5,0.75,1.0,1.5,2.0]
-#J_space = 1:0.5:2.5
-
-#f=jldopen("./data/Full Fledged/data16x16full.jld2","r")
-
-#f=jldopen("./data/fullres/data8x8fullresbind_1.jld2","r")
-f=jldopen("/home/vamsi/Github/AntiFerro-Jzz/data4x4Jzzfullresbind2019-02-02T01:28:11.986.jld2","r")
+f=jldopen("/home/vamsi/Github/AntiFerro-Jzz/data4x4fullresbind2019-03-20T00:22:59.318.jld2","r")
+E_temp = f["E_temp"].s
 mag_temp = f["mag_temp"].s
 skyrm_temp = f["skyrm_temp"].s
-skyrm_err_temp = f["skyrm_err_temp"].s
-mag_err_temp = f["mag_err_temp"].s
 magbind_temp = f["magbind_temp"].s
-magbind_err_temp = f["magbind_err_temp"].s
 skyrmbind_temp = f["skyrmbind_temp"].s
-skyrmbind_err_temp = f["skyrmbind_err_temp"].s
-
 N = f["N"]
 Temperature = f["Temperature"]
 J_space = f["J_space"]
 
-
-#jstart = 5
-#jend = 20
-
 jstart = 1
 jend = length(J_space)
 
-#skyrm = Array{Float64,3}(length(Temperature),length(J_space),2)
-skyrm = Array{Float64,4}(undef,length(Temperature),length(J_space),4,3)
-mag = Array{Float64,4}(undef,length(Temperature),length(J_space),4,3)
-skyrm_err = Array{Float64,4}(undef,length(Temperature),length(J_space),4,3)
-mag_err = Array{Float64,4}(undef,length(Temperature),length(J_space),4,3)
+skyrm = Array{Float64,5}(undef,length(Temperature),length(J_space),4,3,2)
+mag = Array{Float64,5}(undef,length(Temperature),length(J_space),4,3,2)
+E = Array{Float64,5}(undef,length(Temperature),length(J_space),4,3,2)
 
-magbind = Array{Float64,3}(undef,length(Temperature),length(J_space),4)
-skyrmbind = Array{Float64,3}(undef,length(Temperature),length(J_space),4)
-magbind_err = Array{Float64,3}(undef,length(Temperature),length(J_space),4)
-skyrmbind_err = Array{Float64,3}(undef,length(Temperature),length(J_space),4)
+magbind = Array{Float64,4}(undef,length(Temperature),length(J_space),4,2)
+skyrmbind = Array{Float64,4}(undef,length(Temperature),length(J_space),4,2)
 
-mag[:,:,:,:] = reshape(mean(mag_temp,dims=5),(size(mag_temp,1),size(mag_temp,2),4,3))
-mag_err[:,:,:,:] = reshape(sqrt.(sum(mag_err_temp.^2,dims=5)./size(mag_err_temp,5)),(size(mag_err_temp,1),size(mag_err_temp,2),4,3))
-skyrm[:,:,:,:] = reshape(mean(skyrm_temp,dims=5),(size(skyrm_temp,1),size(skyrm_temp,2),4,3))
-skyrm_err[:,:,:,:] = reshape(sqrt.(sum(skyrm_err_temp.^2,dims=5)./size(skyrm_err_temp,5)),(size(skyrm_err_temp,1),size(skyrm_err_temp,2),4,3))
 
-magbind[:,:,:] = reshape(mean(magbind_temp,dims=4),(size(magbind_temp,1),size(magbind_temp,2),4))
-magbind_err[:,:,:] = reshape(sqrt.(sum(magbind_err_temp.^2,dims=4)./size(magbind_err_temp,4)),(size(magbind_err_temp,1),size(magbind_err_temp,2),4))
+E[:,:,:,:,1] = reshape(mean(E_temp[:,:,:,:,1,:],dims=5),(size(E_temp,1),size(E_temp,2),4,3))
+E[:,:,:,:,2] = reshape(sqrt.(mean(E_temp[:,:,:,:,2,:].^2,dims=5)),(size(E_temp,1),size(E_temp,2),4,3))
+
+
+mag[:,:,:,:,1] = reshape(mean(mag_temp[:,:,:,:,1,:],dims=5),(size(mag_temp,1),size(mag_temp,2),4,3))
+mag[:,:,:,:,2] = reshape(sqrt.(mean(mag_temp[:,:,:,:,2,:].^2,dims=5)),(size(mag_temp,1),size(mag_temp,2),4,3))
+
+skyrm[:,:,:,:,1] = reshape(mean(skyrm_temp[:,:,:,:,1,:],dims=5),(size(skyrm_temp,1),size(skyrm_temp,2),4,3))
+skyrm[:,:,:,:,2] = reshape(sqrt.(mean(skyrm_temp[:,:,:,:,2,:].^2,dims=5)),(size(skyrm_temp,1),size(skyrm_temp,2),4,3))
+
+magbind[:,:,:,1] = reshape(mean(magbind_temp[:,:,:,1,:],dims=4),(size(magbind_temp,1),size(magbind_temp,2),4))
+magbind[:,:,:,2] = reshape(sqrt.(mean(magbind_temp[:,:,:,2,:].^2,dims=4)),(size(magbind_temp,1),size(magbind_temp,2),4))
 
 #skyrmbind[:,:,:] = reshape(mean(skyrmbind_temp,dims=4),(size(skyrmbind_temp,1),size(skyrmbind_temp,2),4))
 #skyrmbind_err[:,:,:] = reshape(sqrt.(sum(skyrmbind_err_temp.^2,dims=4)./size(skyrmbind_err_temp,4)),(size(skyrmbind_err_temp,1),size(skyrmbind_err_temp,2),4))
 
-skyrmbind[:,:,:] = reshape(meanfinite(skyrmbind_temp,4),(size(skyrmbind_temp,1),size(skyrmbind_temp,2),4))
-skyrmbind_err[:,:,:] = reshape(sqrt.(meanfinite(skyrmbind_err_temp.^2,4)),(size(skyrmbind_err_temp,1),size(skyrmbind_err_temp,2),4))
+skyrmbind[:,:,:,1] = reshape(meanfinite(skyrmbind_temp[:,:,:,1,:],4),(size(skyrmbind_temp,1),size(skyrmbind_temp,2),4))
+skyrmbind[:,:,:,2] = reshape(sqrt.(meanfinite(skyrmbind_temp[:,:,:,2,:].^2,4)),(size(skyrmbind_temp,1),size(skyrmbind_temp,2),4))
 
+#=
 #magtemp
 for jj in 1:3
 figure()
@@ -152,17 +136,15 @@ for jj in 1:3
     end
 end
 
+=#
+#=
 #skyrmj1j2
 for jj in 1:3
     figure()
     for ii in 1:4
         subplot(2,2,ii)
         for i in 1:1:length(Temperature)
-            #if ii == 2
-            #    errorbar(J_space,(skyrm[i,:,ii,jj]+skyrm[i,:,ii+1,jj])/2,yerr = (skyrm_err[i,:,ii,jj]+skyrm_err[i,:,ii+1,jj])/2,fmt="o",linestyle="-",color=palette[mod(3*i-3,palsize)+1,:])
-            #else
-                errorbar(J_space,skyrm[i,:,ii,jj],skyrm_err[i,:,ii,jj],fmt="o",linestyle="-",color=palette[mod(3*i-3,palsize)+1,:])
-            #end
+            errorbar(J_space,skyrm[i,:,ii,jj,1],skyrm[i,:,ii,jj,2],fmt="o",linestyle="-",color=palette[mod(3*i-3,palsize)+1,:])
         end
         if ii == 1
             title("Skyrmion 00 - "*string(N)*"x"*string(N),fontsize = 17)
@@ -176,7 +158,7 @@ for jj in 1:3
         end
         #legend("T = ".*string.(Temperature[1:1:end]),bbox_to_anchor=[1.05,1],loc=2,ncol = 1)
         if ii>2
-            xlabel(L"$J_1/J_2$",fontsize = 14)
+            xlabel(L"$J_2/J_1$",fontsize = 14)
         end
         if mod(ii,2)==1
             if jj == 1
@@ -198,11 +180,7 @@ for jj in 1:3
     for ii in 1:4
         subplot(2,2,ii)
         for i in 1:1:length(Temperature)
-            #if ii == 2
-            #    errorbar(J_space,(mag[i,:,ii,jj]+mag[i,:,ii+1,jj])/2,yerr = (mag_err[i,:,ii,jj]+mag_err[i,:,ii+1,jj])/2,fmt="o",linestyle="-",color=palette[mod(3*i-3,palsize)+1,:])
-            #else
-                errorbar(J_space,mag[i,:,ii,jj],mag_err[i,:,ii,jj],fmt="o",linestyle="-",color=palette[mod(3*i-3,palsize)+1,:])
-            #end
+            errorbar(J_space,mag[i,:,ii,jj,1],mag[i,:,ii,jj,2],fmt="o",linestyle="-",color=palette[mod(3*i-3,palsize)+1,:])
         end
         if ii == 1
             title("Magnetisation 00 - "*string(N)*"x"*string(N),fontsize = 17)
@@ -215,7 +193,77 @@ for jj in 1:3
             title(L"Magnetisation $\pi \pi$ - "*string(N)*"x"*string(N),fontsize = 17)
         end
         if ii>2
-            xlabel(L"$J_1/J_2$",fontsize = 14)
+            xlabel(L"$J_2/J_1$",fontsize = 14)
+        end
+        if mod(ii,2)==1
+            if jj == 1
+                ylabel(L"|mag|",fontsize = 14)
+            elseif jj == 2
+                ylabel(L"$ \langle mag^2 \rangle$",fontsize = 14)
+            elseif jj == 3
+                ylabel(L"$ mag^4$",fontsize = 14)
+            end
+        end
+        axvline(x=0.5,linestyle="-.",color="r")
+        grid("on")
+    end
+end
+
+#Ej1j2
+for jj in 1:3
+    figure()
+    for ii in 1:4
+        subplot(2,2,ii)
+        for i in 1:1:length(Temperature)
+            errorbar(J_space,E[i,:,ii,jj,1],E[i,:,ii,jj,2],fmt="o",linestyle="-",color=palette[mod(3*i-3,palsize)+1,:])
+        end
+        if ii == 1
+            title("Energy 00 - "*string(N)*"x"*string(N),fontsize = 17)
+        elseif ii == 2
+            title(L"Energy $(0\pi+ \pi 0)/2$ - "*string(N)*"x"*string(N),fontsize = 17)
+            legend("T = ".*string.(Temperature[1:1:end]),bbox_to_anchor=[1.05,1],loc=2,ncol = 1)
+        elseif ii == 3
+            title(L"Energy $\pi 0$ - "*string(N)*"x"*string(N),fontsize = 17)
+        elseif ii == 4
+            title(L"Energy $\pi \pi$ - "*string(N)*"x"*string(N),fontsize = 17)
+        end
+        if ii>2
+            xlabel(L"$J_2/J_1$",fontsize = 14)
+        end
+        if mod(ii,2)==1
+            if jj == 1
+                ylabel(L"E",fontsize = 14)
+            elseif jj == 2
+                ylabel(L"$ \langle E^2 \rangle$",fontsize = 14)
+            elseif jj == 3
+                ylabel(L"$ \langle E^4 \rangle$",fontsize = 14)
+            end
+        end
+        axvline(x=0.5,linestyle="-.",color="r")
+        grid("on")
+    end
+end
+=#
+#Susceptibilityj1j2
+for jj in 1:3
+    figure()
+    for ii in 1:4
+        subplot(2,2,ii)
+        for i in 1:1:length(Temperature)
+            errorbar(J_space,mag[i,:,ii,jj,1],mag[i,:,ii,jj,2],fmt="o",linestyle="-",color=palette[mod(3*i-3,palsize)+1,:])
+        end
+        if ii == 1
+            title("Magnetisation 00 - "*string(N)*"x"*string(N),fontsize = 17)
+        elseif ii == 2
+            title(L"Magnetisation $(0\pi+ \pi 0)/2$ - "*string(N)*"x"*string(N),fontsize = 17)
+            legend("T = ".*string.(Temperature[1:1:end]),bbox_to_anchor=[1.05,1],loc=2,ncol = 1)
+        elseif ii == 3
+            title(L"Magnetisation $\pi 0$ - "*string(N)*"x"*string(N),fontsize = 17)
+        elseif ii == 4
+            title(L"Magnetisation $\pi \pi$ - "*string(N)*"x"*string(N),fontsize = 17)
+        end
+        if ii>2
+            xlabel(L"$J_2/J_1$",fontsize = 14)
         end
         if mod(ii,2)==1
             if jj == 1
@@ -232,6 +280,7 @@ for jj in 1:3
 end
 
 #SKYRMBIND
+#=
 figure()
 for ii in 1:4
     subplot(2,2,ii)
@@ -259,6 +308,7 @@ for ii in 1:4
 end
 
 #MAGBINDER
+
 figure()
 for ii in 1:4
     subplot(2,2,ii)
@@ -289,3 +339,4 @@ for ii in 1:4
     axvline(x=0.5,linestyle="-.",color="r")
     grid("on")
 end
+=#
