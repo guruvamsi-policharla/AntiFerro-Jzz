@@ -55,7 +55,7 @@ proc_complete[1] = 1
 for i in 1:5000
     if(mean(proc_complete) == 1)
         println(proc_complete)
-        @save "data"*string(N)*"x"*string(N)*"fullresbind"*string(Dates.now())*".jld2" E_temp skyrm_temp mag_temp magbind_temp skyrmbind_temp Temperature N J_space
+        @save "Jzzdata"*string(N)*"x"*string(N)*"fullresbind"*string(Dates.now())*".jld2" E_temp skyrm_temp mag_temp magbind_temp skyrmbind_temp Temperature N J_space
 	break
     end
     println(proc_complete)
